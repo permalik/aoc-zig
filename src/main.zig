@@ -3,6 +3,7 @@
 //! is to delete this file and start with root.zig instead.
 pub fn main() !void {
     try one();
+    try two();
 }
 
 fn one() !void {
@@ -20,8 +21,45 @@ fn one() !void {
     const contents = try cwd.readFileAlloc(alloc, "/home/parallels/Docs/Git/aoc-zig/aoc/2015/001/input.txt", 8192);
     defer alloc.free(contents);
 
-    try stdout.print("Running one..\n", .{});
-    try stdout.print("{s}", .{contents});
+    var floor: i32 = 0;
+    for (contents) |char| {
+	if (char == '(') {
+	    floor += 1;
+	} else if (char == ')') {
+	    floor -= 1;
+	}
+    }
+    try stdout.print("Santa is on floor {d}\n\n", .{floor});
+    try bw.flush();
+}
+
+fn two() !void {
+    std.debug.print("Starting two..\n", .{});
+
+    const stdout_file = std.io.getStdOut().writer();
+    var bw = std.io.bufferedWriter(stdout_file);
+    var stdout = bw.writer();
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const alloc = gpa.allocator();
+
+    const cwd = std.fs.cwd();
+    const contents = try cwd.readFileAlloc(alloc, "/home/parallels/Docs/Git/aoc-zig/aoc/2015/001/input.txt", 8192);
+    defer alloc.free(contents);
+
+    var floor: i32 = 0;
+    for (contents, 0..) |char, index| {
+	if (floor == -1) {
+	    try stdout.print("Santa is on basement floor {d} at position {d}\n", .{floor, index});
+	    break;
+	}
+	if (char == '(') {
+	    floor += 1;
+	} else if (char == ')') {
+	    floor -= 1;
+	}
+    }
     try bw.flush();
 }
 
